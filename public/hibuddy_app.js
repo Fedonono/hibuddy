@@ -1,6 +1,10 @@
 /* globals EventSource, MicroEvent,
    mozRTCPeerConnection, mozRTCSessionDescription, mozRTCIceCandidate */
 
+var RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription,
+  RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate || window.webkitRTCIceCandidate,
+  RTCPeerConnection =  window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
+
 function HiBuddyApp(room) {
   this.room = room;
   this.me = undefined;
@@ -35,7 +39,7 @@ HiBuddyApp.prototype = {
   },
 
   _onNewBuddy: function() {
-    var peerConnection = new mozRTCPeerConnection(this.config);
+    var peerConnection = new RTCPeerConnection(this.config);
     this.peerConnection = this._setupPeerConnection(peerConnection);
     this._sendOffer();
     this.trigger("newbuddy");
@@ -43,11 +47,11 @@ HiBuddyApp.prototype = {
 
   _onOffer: function(event) {
     var message = JSON.parse(event.data);
-    var peerConnection = new mozRTCPeerConnection(this.config);
+    var peerConnection = new RTCPeerConnection(this.config);
 
     this.peerConnection = this._setupPeerConnection(peerConnection);
 
-    var offer = new mozRTCSessionDescription(message.offer);
+    var offer = new RTCSessionDescription(message.offer);
     this.peerConnection.setRemoteDescription(offer, function() {
       this._sendAnswer();
     }.bind(this));
@@ -57,7 +61,7 @@ HiBuddyApp.prototype = {
     var message = JSON.parse(event.data);
     console.log(message.answer);
 
-    var answer = new mozRTCSessionDescription(message.answer);
+    var answer = new RTCSessionDescription(message.answer);
     this.peerConnection.setRemoteDescription(answer, function() {
       console.log("done");
     }.bind(this));
@@ -66,7 +70,7 @@ HiBuddyApp.prototype = {
   _onIceCandidate: function(event) {
     var message = JSON.parse(event.data);
 
-    var candidate = new mozRTCIceCandidate(message.candidate);
+    var candidate = new RTCIceCandidate(message.candidate);
     this.peerConnection.addIceCandidate(candidate);
   },
 

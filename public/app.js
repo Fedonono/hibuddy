@@ -34,15 +34,27 @@
 
   display(allowMedia);
 
-  navigator.mozGetUserMedia({video: true, audio: true}, function(localStream) {
+  navigator.getUserMedia = (navigator.getUserMedia ||
+                            navigator.webkitGetUserMedia ||
+                            navigator.mozGetUserMedia);
+
+  navigator.getUserMedia({video: true, audio: true}, function(localStream) {
     var el = document.querySelector("nav");
     var toolbar = new HiBuddyToolbar(el, localStream);
 
-    localVideo.mozSrcObject = localStream;
+    if (navigator.mozGetUserMedia) {
+      localVideo.mozSrcObject = localStream;
+    } else {
+      localVideo.src = webkitURL.createObjectURL(localStream);
+    }
     localVideo.play();
 
     hibuddy.start(localStream, function(remoteStream) {
-      remoteVideo.mozSrcObject = remoteStream;
+      if (navigator.mozGetUserMedia) {
+        remoteVideo.mozSrcObject = remoteStream;
+      } else {
+        remoteVideo.src = webkitURL.createObjectURL(remoteStream);
+      }
       remoteVideo.play();
     });
 
